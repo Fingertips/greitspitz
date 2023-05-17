@@ -24,6 +24,23 @@ module Spec
   def self.generate_tmp_filename
     tmp_path.join("#{UUID.random}")
   end
+
+  def self.with_environment(env : Hash(String, String), &block)
+    before = env.keys.reduce({} of String => String | Nil) do |memo, name|
+      memo[name] = ENV.fetch(name) { nil }
+      memo
+    end
+    set_environment_variables(env)
+    yield
+  ensure
+    set_environment_variables(before) if before
+  end
+
+  def self.set_environment_variables(variables : Hash(String, String | Nil))
+    variables.each do |name, value|
+      ENV[name] = value
+    end
+  end
 end
 
 Spec.around_each do |example|
