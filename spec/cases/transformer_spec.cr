@@ -268,4 +268,15 @@ describe Greitspitz::Transformer do
       end
     end
   end
+
+  it "writes the output as sRGB" do
+    temporary_filename = Spec.generate_tmp_filename
+    File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
+      File.open(temporary_filename, "wb") do |output|
+        Greitspitz::Transformer.new(input, {"format" => "jpeg"}).write(output)
+      end
+    end
+    image = Vips::Image.new_from_file(temporary_filename.to_s)
+    image.get_typeof("icc-profile-data").should eq(0)
+  end
 end
