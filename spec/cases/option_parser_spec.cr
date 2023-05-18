@@ -5,13 +5,13 @@ describe Greitspitz::OptionParser do
     context = Greitspitz::Context.new
     Greitspitz::OptionParser.parse([""], context)
     context.run?.should be_true
-    context.verbose?.should be_false
+    context.log_level.should be_nil
   end
 
-  it "allows verbose logging" do
+  it "allows changes to the log-level" do
     context = Greitspitz::Context.new
-    Greitspitz::OptionParser.parse(["--verbose"], context)
+    Greitspitz::OptionParser.parse(["--log-level", "fatal"], context)
     context.run?.should be_true
-    context.verbose?.should be_true
+    context.log_level.should eq("fatal")
   end
 end

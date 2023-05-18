@@ -25,7 +25,9 @@ module Spec
     tmp_path.join("#{UUID.random}")
   end
 
-  def self.with_environment(env : Hash(String, String), &block)
+  # Change environment variables for the duration of the block to create a deterministic situation
+  # for assertions.
+  def self.with_environment(env : Hash(String, String | Nil), &block)
     before = env.keys.reduce({} of String => String | Nil) do |memo, name|
       memo[name] = ENV.fetch(name) { nil }
       memo
@@ -36,7 +38,7 @@ module Spec
     set_environment_variables(before) if before
   end
 
-  def self.set_environment_variables(variables : Hash(String, String | Nil))
+  private def self.set_environment_variables(variables : Hash(String, String | Nil))
     variables.each do |name, value|
       ENV[name] = value
     end
