@@ -28,6 +28,7 @@ module Greitspitz
 
     def write(output : IO)
       image = Vips::Image.new_from_buffer(@input)
+      images = image.colourspace(Vips::Enums::Interpretation::Srgb)
       format = ".jpg"
       @operations.each do |name, value|
         case name
