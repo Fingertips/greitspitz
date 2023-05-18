@@ -1,6 +1,18 @@
 require "../spec_helper"
 
 describe Greitspitz::Transformer do
+  it "returns a content-type for all supported formats" do
+    Greitspitz::Transformer::FORMATS.each do |format, _|
+      transformer = Greitspitz::Transformer.new(IO::Memory.new, {"format" => format})
+      transformer.content_type.should eq(Greitspitz::Transformer::CONTENT_TYPES[format])
+    end
+  end
+
+  it "returns a content-type by default" do
+    transformer = Greitspitz::Transformer.new(IO::Memory.new, {"fit" => "360"})
+    transformer.content_type.should eq("image/jpeg")
+  end
+
   it "raises an exception about empty operation" do
     temporary_filename = Spec.generate_tmp_filename
     File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|

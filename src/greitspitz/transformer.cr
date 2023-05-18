@@ -12,8 +12,18 @@ module Greitspitz
       "png"  => ".png",
     }
 
+    CONTENT_TYPES = {
+      "avif" => "image/avif",
+      "jpeg" => "image/jpeg",
+      "png"  => "image/png",
+    }
+
     def initialize(@input : IO, @operations : Hash(String, String))
       raise ArgumentError.new("Operations may not be empty") if @operations.empty?
+    end
+
+    def content_type
+      content_type_from_operations || "image/jpeg"
     end
 
     def write(output : IO)
@@ -61,6 +71,15 @@ module Greitspitz
       FORMATS.fetch(format) do
         raise ArgumentError.new("Unsupported format `#{format}'")
       end
+    end
+
+    private def content_type_from_operations
+      @operations.each do |name, value|
+        next unless name == "format"
+
+        return CONTENT_TYPES[value]
+      end
+      nil
     end
   end
 end
