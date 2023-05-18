@@ -32,18 +32,9 @@ module Greitspitz
       @operations.each do |name, value|
         case name
         when "fit"
-          width, height = self.class.parse_dimensions(value)
-          image = image.thumbnail_image(
-            width, height: height,
-            size: Vips::Enums::Size::Down
-          )
+          image = apply_fit(image, value)
         when "crop"
-          width, height = self.class.parse_dimensions(value)
-          image = image.thumbnail_image(
-            width, height: height,
-            crop: Vips::Enums::Interesting::Centre,
-            size: Vips::Enums::Size::Down
-          )
+          image = apply_crop(image, value)
         when "format"
           format = self.class.format(value)
         else
@@ -51,6 +42,23 @@ module Greitspitz
         end
       end
       image.write_to_target(output, format: format)
+    end
+
+    private def apply_fit(image, dimensions)
+      width, height = self.class.parse_dimensions(dimensions)
+      image.thumbnail_image(
+        width, height: height,
+        size: Vips::Enums::Size::Down
+      )
+    end
+
+    private def apply_crop(image, dimensions)
+      width, height = self.class.parse_dimensions(dimensions)
+      image.thumbnail_image(
+        width, height: height,
+        crop: Vips::Enums::Interesting::Centre,
+        size: Vips::Enums::Size::Down
+      )
     end
 
     def self.parse_dimensions(value)
