@@ -4,6 +4,9 @@ module Greitspitz
   # Applies a list of operations to transform a source image. Allows a format parameter to force
   # an output format other than JPEG.
   class Transformer
+    getter format : String
+    getter quality : Int32
+
     # We only support a subset of available formats in VIPS to reduce the attack surface on the
     # server and only serve image formats that make sense in the browser.
     FORMATS = {
@@ -12,35 +15,20 @@ module Greitspitz
       "png"  => ".png",
     }
 
-    CONTENT_TYPES = {
-      "avif" => "image/avif",
-      "jpeg" => "image/jpeg",
-      "png"  => "image/png",
-    }
-
-    def initialize(@input : IO, @operations : Hash(String, String))
-      raise ArgumentError.new("Operations may not be empty") if @operations.empty?
-    end
-
-    def content_type
-      content_type_from_operations || "image/jpeg"
+    def initialize(@input : IO, @instructions : Instructions)
+      @format = FORMATS.fetch(@instructions.format) { ".jpg" }
+      @quality = @instructions.quality || 90
     end
 
     def write(output : IO)
       image = Vips::Image.new_from_buffer(@input)
       images = image.colourspace(Vips::Enums::Interpretation::Srgb)
-      format = ".jpg"
-      quality = 90
-      @operations.each do |name, value|
+      @instructions.transformations.each do |name, value|
         case name
         when "fit"
           image = apply_fit(image, value)
         when "crop"
           image = apply_crop(image, value)
-        when "format"
-          format = self.class.format(value)
-        when "quality"
-          quality = self.class.quality(value)
         else
           raise ArgumentError.new("Unsupported operations `#{name}'")
         end
@@ -77,28 +65,6 @@ module Greitspitz
           "Dimensions should either be in the form 'MxN' or 'N': got: `#{value}'"
         )
       end
-    end
-
-    def self.format(format)
-      FORMATS.fetch(format) do
-        raise ArgumentError.new("Unsupported format `#{format}'")
-      end
-    end
-
-    def self.quality(quality)
-      quality = quality.to_i
-      raise ArgumentError.new("Quality may not be lower than 0") if quality < 0
-      raise ArgumentError.new("Quality may not be higher than 100") if quality > 100
-      quality
-    end
-
-    private def content_type_from_operations
-      @operations.each do |name, value|
-        next unless name == "format"
-
-        return CONTENT_TYPES[value]
-      end
-      nil
     end
   end
 end

@@ -71,6 +71,24 @@ module Spec
       ENV[name] = value
     end
   end
+
+  def self.transform_image(instructions : String)
+    temporary_filename = Spec.generate_tmp_filename
+    File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
+      File.open(temporary_filename, "wb") do |output|
+        Greitspitz::Transformer.new(input, Greitspitz::Instructions.new(instructions)).write(output)
+      end
+    end
+    Vips::Image.new_from_file(temporary_filename.to_s)
+  end
+
+  def self.transform_image(instructions : String, input : IO::Memory)
+    temporary_filename = Spec.generate_tmp_filename
+    File.open(temporary_filename, "wb") do |output|
+      Greitspitz::Transformer.new(input, Greitspitz::Instructions.new(instructions)).write(output)
+    end
+    Vips::Image.new_from_file(temporary_filename.to_s)
+  end
 end
 
 Spec.around_each do |example|

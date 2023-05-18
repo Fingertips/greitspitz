@@ -2,26 +2,26 @@
 
 An HTTP proxy that sits in front of S3 compatible object storage and performs image operations before serving the images.
 
-## Operations and formats
+## Instructions
 
-Note that none of the operation every scale the image up.
+Note that none of the transformations every scale up the image.
 
 * `fit:N[xM]`: Fit the image within a bounding box.
 * `crop:N[xM]`: Crop the image to fill a bounding box.
 * `format:(avif|jpeg|png)`: Specify the output format, uses `jpeg` as default.
 * `quality:(0-100)`: Specify the output quality as a percentage. Ignored when writing a format like PNG.
 
-## Encoding operations and formats
+## Encoding instructions
 
-You can specify zero or more operations to apply to the image. They are performed in the specified order. You can zero or more formats, only the last one is applied.
+You can specify zero or more instructions to apply to the image. They are performed in the specified order. You can specify zero or more formats, only the last one is applied.
 
-Join the operation and value using a `:`, separate multiple parameters using `,`.
+Join the instruction and value using a `:`, separate multiple entries using `,`.
 
     fit:1920,format:avif
 
 ## Building a request path
 
-The request paths contains: bucket name, key, and operations and format as described above. Encode the path components for use in a request path and join them with a `/`.
+The request paths contains: bucket name, key, and instructions. They are formatted as described above. Encode the path components for use in a request path and join them with a `/`.
 
     /avatars-production/avatars%2F6a3TaSvh944gKbcfrj2VCLC19exiGfbo/fit:1920,format:avif
 

@@ -37,8 +37,18 @@ module Support
     end
 
     def get(resource : String)
+      perform_get(resource, headers: nil)
+    end
+
+    def get(resource : String, headers : Hash(String, String))
+      perform_get(resource, headers: headers)
+    end
+
+    private def perform_get(resource, headers : Hash(String, String) | Nil)
+      http_headers = HTTP::Headers.new
+      headers.each { |name, value| http_headers.add(name, value) } if headers
       @response_io = IO::Memory.new
-      @request = HTTP::Request.new("GET", resource)
+      @request = HTTP::Request.new("GET", resource, headers: http_headers)
       @response = HTTP::Server::Response.new(response_io)
       @http_handler.call(HTTP::Server::Context.new(request, response))
     end
