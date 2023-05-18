@@ -34,6 +34,14 @@ describe Greitspitz::Instructions do
     Greitspitz::Instructions.new("fit:4").content_type.should be_nil
   end
 
+  it "allows changing the format after initialization" do
+    instructions = Greitspitz::Instructions.new("crop:480")
+    instructions.format.should be_nil
+    instructions.format ||= "avif"
+    instructions.format.should eq("avif")
+    instructions.content_type.should eq("image/avif")
+  end
+
   it "raises an exception for empty instructions" do
     expect_raises(ArgumentError, "Instructions can't be parsed, got: `'") do
       Greitspitz::Instructions.new("")

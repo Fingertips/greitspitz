@@ -7,7 +7,7 @@ module Greitspitz
       "png"  => "image/png",
     }
 
-    getter format : String | Nil
+    property format : String | Nil
     getter quality : Int32 | Nil
     getter transformations : Hash(String, String)
 
