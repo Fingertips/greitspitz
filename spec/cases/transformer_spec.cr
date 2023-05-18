@@ -14,18 +14,14 @@ describe Greitspitz::Transformer do
   end
 
   it "raises an exception about empty operation" do
-    temporary_filename = Spec.generate_tmp_filename
     File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
-      File.open(temporary_filename, "wb") do |output|
-        expect_raises(
-          ArgumentError,
-          "Operations may not be empty"
-        ) do
-          Greitspitz::Transformer.new(input, {} of String => String).write(output)
-        end
+      expect_raises(
+        ArgumentError,
+        "Operations may not be empty"
+      ) do
+        Greitspitz::Transformer.new(input, {} of String => String).write(IO::Memory.new)
       end
     end
-    File.size(temporary_filename).should eq(0)
   end
 
   it "scales an image to fit within a bounding box" do
@@ -111,18 +107,15 @@ describe Greitspitz::Transformer do
   end
 
   it "does not scale an image with a bad fit value" do
-    temporary_filename = Spec.generate_tmp_filename
     File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
-      File.open(temporary_filename, "wb") do |output|
-        expect_raises(
-          ArgumentError,
-          "Dimensions should either be in the form 'MxN' or 'N': got: `80x80x80'"
-        ) do
-          Greitspitz::Transformer.new(
-            input,
-            {"fit" => "80x80x80"}
-          ).write(output)
-        end
+      expect_raises(
+        ArgumentError,
+        "Dimensions should either be in the form 'MxN' or 'N': got: `80x80x80'"
+      ) do
+        Greitspitz::Transformer.new(
+          input,
+          {"fit" => "80x80x80"}
+        ).write(IO::Memory.new)
       end
     end
   end
@@ -253,18 +246,15 @@ describe Greitspitz::Transformer do
   end
 
   it "does not format the output as an unknown format" do
-    temporary_filename = Spec.generate_tmp_filename
     File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
-      File.open(temporary_filename, "wb") do |output|
-        expect_raises(
-          ArgumentError,
-          "Unsupported format `unknown'"
-        ) do
-          Greitspitz::Transformer.new(
-            input,
-            {"format" => "unknown"}
-          ).write(output)
-        end
+      expect_raises(
+        ArgumentError,
+        "Unsupported format `unknown'"
+      ) do
+        Greitspitz::Transformer.new(
+          input,
+          {"format" => "unknown"}
+        ).write(IO::Memory.new)
       end
     end
   end
@@ -278,5 +268,72 @@ describe Greitspitz::Transformer do
     end
     image = Vips::Image.new_from_file(temporary_filename.to_s)
     image.get_typeof("icc-profile-data").should eq(0)
+  end
+
+  it "sets the quality of the resulting JPEG image" do
+    temporary_filename = Spec.generate_tmp_filename
+    File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
+      File.open(temporary_filename, "wb") do |output|
+        Greitspitz::Transformer.new(input, {"quality" => "90"}).write(output)
+      end
+    end
+    file_size = File.size(temporary_filename)
+
+    File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
+      File.open(temporary_filename, "wb") do |output|
+        Greitspitz::Transformer.new(input, {"quality" => "50"}).write(output)
+      end
+    end
+    File.size(temporary_filename).should be < file_size
+  end
+
+  it "sets the quality of the resulting AVIF image" do
+    temporary_filename = Spec.generate_tmp_filename
+    File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
+      File.open(temporary_filename, "wb") do |output|
+        Greitspitz::Transformer.new(input, {"format" => "avif", "quality" => "90"}).write(output)
+      end
+    end
+    file_size = File.size(temporary_filename)
+
+    File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
+      File.open(temporary_filename, "wb") do |output|
+        Greitspitz::Transformer.new(input, {"format" => "avif", "quality" => "50"}).write(output)
+      end
+    end
+    File.size(temporary_filename).should be < file_size
+  end
+
+  it "ignores the quality of the resulting PNG image" do
+    temporary_filename = Spec.generate_tmp_filename
+    File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
+      File.open(temporary_filename, "wb") do |output|
+        Greitspitz::Transformer.new(input, {"format" => "png", "quality" => "90"}).write(output)
+      end
+    end
+    file_size = File.size(temporary_filename)
+
+    File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
+      File.open(temporary_filename, "wb") do |output|
+        Greitspitz::Transformer.new(input, {"format" => "png", "quality" => "50"}).write(output)
+      end
+    end
+    File.size(temporary_filename).should eq(file_size)
+  end
+
+  it "raises an exception when setting a negative quality" do
+    File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
+      expect_raises(ArgumentError, "Quality may not be lower than 0") do
+        Greitspitz::Transformer.new(input, {"quality" => "-1"}).write(IO::Memory.new)
+      end
+    end
+  end
+
+  it "raises an exception when setting quality higher than 100" do
+    File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
+      expect_raises(ArgumentError, "Quality may not be higher than 100") do
+        Greitspitz::Transformer.new(input, {"quality" => "101"}).write(IO::Memory.new)
+      end
+    end
   end
 end

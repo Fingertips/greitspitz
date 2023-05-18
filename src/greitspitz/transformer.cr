@@ -30,6 +30,7 @@ module Greitspitz
       image = Vips::Image.new_from_buffer(@input)
       images = image.colourspace(Vips::Enums::Interpretation::Srgb)
       format = ".jpg"
+      quality = 90
       @operations.each do |name, value|
         case name
         when "fit"
@@ -38,11 +39,13 @@ module Greitspitz
           image = apply_crop(image, value)
         when "format"
           format = self.class.format(value)
+        when "quality"
+          quality = self.class.quality(value)
         else
           raise ArgumentError.new("Unsupported operations `#{name}'")
         end
       end
-      image.write_to_target(output, format: format)
+      image.write_to_target(output, format: format, Q: quality)
     end
 
     private def apply_fit(image, dimensions)
@@ -80,6 +83,13 @@ module Greitspitz
       FORMATS.fetch(format) do
         raise ArgumentError.new("Unsupported format `#{format}'")
       end
+    end
+
+    def self.quality(quality)
+      quality = quality.to_i
+      raise ArgumentError.new("Quality may not be lower than 0") if quality < 0
+      raise ArgumentError.new("Quality may not be higher than 100") if quality > 100
+      quality
     end
 
     private def content_type_from_operations

@@ -9,6 +9,7 @@ Note that none of the operation every scale the image up.
 * `fit:N[xM]`: Fit the image within a bounding box.
 * `crop:N[xM]`: Crop the image to fill a bounding box.
 * `format:(avif|jpeg|png)`: Specify the output format, uses `jpeg` as default.
+* `quality:(0-100)`: Specify the output quality as a percentage. Ignored when writing a format like PNG.
 
 ## Encoding operations and formats
 
