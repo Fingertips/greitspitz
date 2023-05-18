@@ -8,7 +8,7 @@ module Greitspitz
 
     def listen
       http_server = HTTP::Server.new([
-        HTTP::LogHandler.new,
+        HTTP::LogHandler.new(Log),
         Greitspitz::HttpHandler.new(@context),
       ])
       address = http_server.bind_tcp 1090
