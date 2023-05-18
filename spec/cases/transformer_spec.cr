@@ -146,4 +146,20 @@ describe Greitspitz::Transformer do
     image = Spec.transform_image("quality:50,format:png")
     File.size(image.filename).should eq(file_size)
   end
+
+  it "strips metadata from an image" do
+    image = Vips::Image.black(4, 4)
+    image = image.mutate do |mutation|
+      mutation.set(Vips::GValue::GString, "exif-ifd0-Model", "Canon EOS M100")
+    end
+    transformer = Greitspitz::Transformer.new(
+      IO::Memory.new(image.jpegsave_buffer),
+      Greitspitz::Instructions.new("quality:30")
+    )
+    output = IO::Memory.new
+    transformer.write(output)
+    output.rewind
+    image = Vips::Image.new_from_buffer(output)
+    image.get_fields.includes?("exif-ifd0-Model").should be_false
+  end
 end

@@ -21,8 +21,8 @@ module Greitspitz
     end
 
     def write(output : IO)
-      image = Vips::Image.new_from_buffer(@input)
-      images = image.colourspace(Vips::Enums::Interpretation::Srgb)
+      image = Vips::Image.new_from_buffer(@input, autorotate: true)
+      image = image.colourspace(Vips::Enums::Interpretation::Srgb)
       @instructions.transformations.each do |name, value|
         case name
         when "fit"
@@ -33,7 +33,16 @@ module Greitspitz
           raise ArgumentError.new("Unsupported operations `#{name}'")
         end
       end
-      image.write_to_target(output, format: format, Q: quality)
+      strip_metadata(image).write_to_target(output, format: format, Q: quality)
+    end
+
+    # Removes all metadata from the image.
+    private def strip_metadata(image)
+      image.mutate do |mutation|
+        image.get_fields.each do |field|
+          mutation.remove(field)
+        end
+      end
     end
 
     private def apply_fit(image, dimensions)
