@@ -11,14 +11,14 @@ describe Greitspitz::Context do
     context.run?.should be_false
   end
 
-  it "not verbose by default" do
-    Greitspitz::Context.new.verbose?.should be_false
+  it "no default log level" do
+    Greitspitz::Context.new.log_level.should be_nil
   end
 
-  it "can be configured to be verbose" do
+  it "can be configured with a specific log level" do
     context = Greitspitz::Context.new
-    context.verbose = true
-    context.verbose?.should be_true
+    context.log_level = "fatal"
+    context.log_level.should eq("fatal")
   end
 
   it "returns the storage access key id from the environment" do
@@ -28,8 +28,10 @@ describe Greitspitz::Context do
   end
 
   it "raises exception when storage access key id is not configured in the environment" do
-    expect_raises(KeyError, "Missing ENV key: \"S3_ACCESS_KEY_ID\"") do
-      Greitspitz::Context.new.storage_access_key_id
+    Spec.with_environment({"S3_ACCESS_KEY_ID" => nil}) do
+      expect_raises(KeyError, "Missing ENV key: \"S3_ACCESS_KEY_ID\"") do
+        Greitspitz::Context.new.storage_access_key_id
+      end
     end
   end
 
@@ -40,8 +42,10 @@ describe Greitspitz::Context do
   end
 
   it "raises exception when storage secret access key is not configured in the environment" do
-    expect_raises(KeyError, "Missing ENV key: \"S3_SECRET_ACCESS_KEY\"") do
-      Greitspitz::Context.new.storage_secret_access_key
+    Spec.with_environment({"S3_SECRET_ACCESS_KEY" => nil}) do
+      expect_raises(KeyError, "Missing ENV key: \"S3_SECRET_ACCESS_KEY\"") do
+        Greitspitz::Context.new.storage_secret_access_key
+      end
     end
   end
 
@@ -52,8 +56,10 @@ describe Greitspitz::Context do
   end
 
   it "raises exception when storage host is not configured in the environment" do
-    expect_raises(KeyError, "Missing ENV key: \"S3_HOST\"") do
-      Greitspitz::Context.new.storage_host
+    Spec.with_environment({"S3_HOST" => nil}) do
+      expect_raises(KeyError, "Missing ENV key: \"S3_HOST\"") do
+        Greitspitz::Context.new.storage_host
+      end
     end
   end
 
@@ -77,8 +83,16 @@ describe Greitspitz::Context do
   end
 
   it "raises exception when building a storage client when environment variables are missing" do
-    expect_raises(KeyError) do
-      Greitspitz::Context.new.storage_client
+    Spec.with_environment(
+      {
+        "S3_ACCESS_KEY_ID"     => nil,
+        "S3_SECRET_ACCESS_KEY" => nil,
+        "S3_HOST"              => nil,
+      }
+    ) do
+      expect_raises(KeyError) do
+        Greitspitz::Context.new.storage_client
+      end
     end
   end
 end

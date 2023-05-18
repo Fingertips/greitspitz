@@ -3,12 +3,14 @@ require "awscr-s3"
 module Greitspitz
   # Providers details about the environment and which switches were used when starting the server.
   class Context
+    # Returns the log level for the process or Nil when it wasn't explicitly set.
+    property log_level : String | Nil
+    # Returns false when the CLI should not run any commands (eg. when printing usage info).
     property? run
-    property? verbose
 
     def initialize
       @run = true
-      @verbose = false
+      @log_level = nil
     end
 
     def storage_access_key_id
