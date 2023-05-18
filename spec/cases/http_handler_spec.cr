@@ -32,4 +32,40 @@ describe Greitspitz::HttpHandler do
     session.get("/")
     session.response_status_code.should eq(404)
   end
+
+  it "serves the image as JPEG when AVIF is not supported" do
+    Spec.with_mocked_object_storage do
+      session = Spec.create_session
+      session.get(
+        "/avatars/w8cfGJVMmjzLdgZf/quality:80",
+        headers: {"Accept" => "*/*"}
+      )
+      session.response_status_code.should eq(200)
+      session.response_content_type.should eq("image/jpeg")
+    end
+  end
+
+  it "serves the image as JPEG when AVIF is supported, but JPEG is explicitly requested" do
+    Spec.with_mocked_object_storage do
+      session = Spec.create_session
+      session.get(
+        "/avatars/w8cfGJVMmjzLdgZf/quality:80,format:jpeg",
+        headers: {"Accept" => "image/avif, */*"}
+      )
+      session.response_status_code.should eq(200)
+      session.response_content_type.should eq("image/jpeg")
+    end
+  end
+
+  it "serves the image as AVIF when it's supported" do
+    Spec.with_mocked_object_storage do
+      session = Spec.create_session
+      session.get(
+        "/avatars/w8cfGJVMmjzLdgZf/quality:80",
+        headers: {"Accept" => "image/avif, */*"}
+      )
+      session.response_status_code.should eq(200)
+      session.response_content_type.should eq("image/avif")
+    end
+  end
 end
