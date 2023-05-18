@@ -10,6 +10,15 @@ describe Greitspitz::HttpHandler do
     end
   end
 
+  it "serves an object from a bucket as a resized AVIF" do
+    Spec.with_mocked_object_storage do
+      session = Spec.create_session
+      session.get("/avatars/w8cfGJVMmjzLdgZf/fit:24,format:avif")
+      session.response_status_code.should eq(200)
+      session.response_content_type.should eq("image/avif")
+    end
+  end
+
   it "serves not found for objects missing in the bucket" do
     Spec.with_mocked_object_storage do
       session = Spec.create_session
