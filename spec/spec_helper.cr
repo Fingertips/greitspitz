@@ -2,6 +2,8 @@ require "spec"
 require "uuid"
 require "file_utils"
 
+require "webmock"
+
 require "../src/greitspitz"
 
 module Spec
