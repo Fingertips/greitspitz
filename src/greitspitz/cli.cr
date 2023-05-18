@@ -17,7 +17,7 @@ module Greitspitz
 
     private def setup_logging
       if @context.log_level
-        ::Log.setup(@context.log_level.not_nil!)
+        ::Log.setup(::Log::Severity.parse(@context.log_level.not_nil!))
       else
         ::Log.setup_from_env
       end
