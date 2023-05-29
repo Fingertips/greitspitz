@@ -10,6 +10,24 @@ describe Greitspitz::HttpHandler do
     end
   end
 
+  it "serves an object with a key that includes a slash" do
+    Spec.with_mocked_object_storage do
+      session = Spec.create_session
+      session.get("/avatars/special/8awboFP4bFrbA8dZ/format:jpeg")
+      session.response_status_code.should eq(200)
+      session.response_content_type.should eq("image/jpeg")
+    end
+  end
+
+  it "serves an object with a key that includes a slash" do
+    Spec.with_mocked_object_storage do
+      session = Spec.create_session
+      session.get("/avatars/special%2F8awboFP4bFrbA8dZ/format:jpeg")
+      session.response_status_code.should eq(200)
+      session.response_content_type.should eq("image/jpeg")
+    end
+  end
+
   it "serves an object from a bucket as a resized AVIF" do
     Spec.with_mocked_object_storage do
       session = Spec.create_session
