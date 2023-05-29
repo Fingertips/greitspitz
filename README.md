@@ -53,3 +53,30 @@ The server always logs to `stdout`. You can set the logging output using environ
     greitspitz --log-level debug
 
 Suported levels are: `trace`, `debug`, `info`, `notice`, `warn`, `error`, `fatal`.
+
+## Docker
+
+Greitspitz releases a Docker image to Docker Hub named `fingertips/greitspitz`.
+
+For small deploys you can choose to use Docker as a process manager. Start by setting up an environment file with server configuration.
+
+Your environment file is going to contain credentials so it's best to set it up something like this:
+
+    sudo mkdir -p /etc/greitspitz
+    sudo touch /etc/greitspitz/server.env
+    sudo chmod 600 /etc/greitspitz/server.env
+
+The contents would of `/etc/greitspitz/server.env` could look something like this:
+
+```
+BIND_ADDR=0.0.0.0:1090
+S3_ACCESS_KEY_ID=secret
+S3_SECRET_ACCESS_KEY=secret
+S3_HOST=s3.example.com
+```
+
+Note that the `BIND_ADDR` is important because `greitspitz` binds to 127.0.0.1 by default.
+
+To start the container and ask Docker to manage it, you do the following:
+
+	    docker run -d --restart unless-stopped --name greitspitz --env-file /etc/greitspitz/server.env -p 1090:1090/tcp fingertips/greitspitz
