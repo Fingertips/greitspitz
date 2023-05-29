@@ -69,7 +69,7 @@ Your environment file is going to contain credentials so it's best to set it up 
 The contents would of `/etc/greitspitz/server.env` could look something like this:
 
 ```
-BIND_ADDR=0.0.0.0:1090
+BIND_ADDR=tcp://0.0.0.0:1090
 S3_ACCESS_KEY_ID=secret
 S3_SECRET_ACCESS_KEY=secret
 S3_HOST=s3.example.com
