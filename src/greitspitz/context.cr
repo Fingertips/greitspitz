@@ -7,10 +7,17 @@ module Greitspitz
     property log_level : String | Nil
     # Returns false when the CLI should not run any commands (eg. when printing usage info).
     property? run
+    # Allows
+    setter bind_address : String | Nil
 
     def initialize
       @run = true
       @log_level = nil
+      self.bind_address = nil
+    end
+
+    def bind_address
+      ENV.fetch("BIND_ADDR") { @bind_address }
     end
 
     def storage_access_key_id
