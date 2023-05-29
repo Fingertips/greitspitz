@@ -11,8 +11,9 @@ module Greitspitz
     end
 
     def call(context)
-      if context.request.path =~ /^\/([^\/]+)\/([^\/]+)\/([^\/]+)$/
-        handle_request(context, URI.decode($1), URI.decode($2), URI.decode($3))
+      parts = context.request.path.split("/").map { |part| URI.decode(part) }
+      if parts.size > 2
+        handle_request(context, parts[1], parts[2..-2].join("/"), parts[-1])
       else
         call_next(context)
       end

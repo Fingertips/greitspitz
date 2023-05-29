@@ -46,6 +46,9 @@ module Spec
           :get, "https://storage.example.com/avatars/w8cfGJVMmjzLdgZf?"
         ).to_return(body_io: file)
         WebMock.stub(
+          :get, "https://storage.example.com/avatars/special/8awboFP4bFrbA8dZ?"
+        ).to_return(body_io: file)
+        WebMock.stub(
           :get, "https://storage.example.com/avatars/1MiD6y6JPh8C4yGT?"
         ).to_return(status: 404, body_io: IO::Memory.new("<?xml><root></root>"))
         yield
