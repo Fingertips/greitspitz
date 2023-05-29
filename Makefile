@@ -36,4 +36,4 @@ push: image
 latest: push
 	export TAG="$$(shards version)"; \
 	docker tag "fingertips/greitspitz:$${TAG}" fingertips/greitspitz; \
-	docker push "fingertips/greitspitz:latest"
+	docker push "fingertips/greitspitz"
