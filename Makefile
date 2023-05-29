@@ -24,3 +24,16 @@ PREFIX ?= /usr/local
 install: release
 	install -d $(PREFIX)/bin
 	install greitspitz $(PREFIX)/bin
+
+image: clean
+	export TAG="$$(shards version)"; \
+	docker build -t "fingertips/greitspitz:$${TAG}" .
+
+push: image
+	export TAG="$$(shards version)"; \
+	docker push "fingertips/greitspitz:$${TAG}"
+
+latest: push
+	export TAG="$$(shards version)"; \
+	docker tag "fingertips/greitspitz:$${TAG}" fingertips/greitspitz; \
+	docker push "fingertips/greitspitz:latest"
