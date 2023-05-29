@@ -10,6 +10,13 @@ module Greitspitz
         parser.separator "Commands:"
 
         parser.on(
+          "-b", "--bind-address BIND_ADDRESS",
+          "Set the address to bind to, eg. tcp://0.0.0.0:1090 or unix:///run/greitspitz.sock"
+        ) do |bind_address|
+          context.bind_address = bind_address
+        end
+
+        parser.on(
           "-l", "--log-level LOG_LEVEL",
           "Set log level to trace, debug, info, notice, warn, error, or fatal"
         ) do |log_level|
