@@ -162,4 +162,12 @@ describe Greitspitz::Transformer do
     image = Vips::Image.new_from_buffer(output)
     image.get_fields.includes?("exif-ifd0-Model").should be_false
   end
+
+  it "transforms a PNG" do
+    image = Spec.transform_image("fit:40x40", extension: ".png")
+    image.width.should eq(40)
+    image.height.should eq(40)
+    content_type = `file --mime-type #{image.filename}`.split(":").last.strip
+    content_type.should eq("image/jpeg")
+  end
 end
