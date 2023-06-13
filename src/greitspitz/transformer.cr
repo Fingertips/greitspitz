@@ -21,7 +21,8 @@ module Greitspitz
     end
 
     def write(output : IO)
-      image = Vips::Image.new_from_buffer(@input, autorotate: true)
+      image = Vips::Image.new_from_buffer(@input)
+      image, _angle, _flip = image.autorot
       image = image.colourspace(Vips::Enums::Interpretation::Srgb)
       @instructions.transformations.each do |name, value|
         case name

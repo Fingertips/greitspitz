@@ -75,9 +75,9 @@ module Spec
     end
   end
 
-  def self.transform_image(instructions : String)
+  def self.transform_image(instructions : String, extension = ".jpg")
     temporary_filename = Spec.generate_tmp_filename
-    File.open(Spec.root.join("spec/files/small.jpg"), "rb") do |input|
+    File.open(Spec.root.join("spec/files/small#{extension}"), "rb") do |input|
       File.open(temporary_filename, "wb") do |output|
         Greitspitz::Transformer.new(input, Greitspitz::Instructions.new(instructions)).write(output)
       end
